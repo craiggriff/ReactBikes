@@ -12,7 +12,7 @@ using ReactBikes.Data;
 namespace ReactBikes.Migrations
 {
     [DbContext(typeof(ReactBikesContext))]
-    [Migration("20220919105458_InitialCreate")]
+    [Migration("20220919135652_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

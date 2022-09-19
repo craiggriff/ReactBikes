@@ -1,4 +1,6 @@
-﻿namespace ReactBikes.Models
+﻿using ReactBikes.Data;
+
+namespace ReactBikes.Models
 {
     public class ManageUserViewModel
     {

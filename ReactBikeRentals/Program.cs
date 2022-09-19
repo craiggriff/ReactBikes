@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ReactBikesContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("ReactBikeRentalsContext") ?? throw new InvalidOperationException("Connection string 'ReactBikeRentalsContext' not found.")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("ReactBikesContext") ?? throw new InvalidOperationException("Connection string 'ReactBikesContext' not found.")));
 
 builder.Services.AddIdentity<ReactBikesUser, IdentityRole>(options =>
 {

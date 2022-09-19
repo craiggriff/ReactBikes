@@ -15,7 +15,7 @@ namespace ReactBikes.Models
         [Range(0,5)]
         [Display(Name = "Average Rating")]
         public int Rating { get; set; }
-        [Display(Name = "Available")]
+        [Display(Name = "Availability")]
         public bool Available { get; set; }
 
     }

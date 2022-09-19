@@ -28,7 +28,12 @@ namespace ReactBikes.Controllers
         {
             var _UserID = User.FindFirstValue(ClaimTypes.NameIdentifier);
             // Only list My Rentals when in "User"
-            var reactBikeRentalsContext = User.IsInRole("Manager") ? _context.Rental.Include(r => r.Bike).Include(r => r.User) : _context.Rental.Include(r => r.Bike).Include(r => r.User).Where(r => r.UserID == _UserID);
+            var reactBikeRentalsContext = User.IsInRole("Manager") ? 
+                _context.Rental.Include(r => r.Bike).Include(r => r.User) : 
+                _context.Rental.Include(r => r.Bike).Include(r => r.User).Where(r => r.UserID == _UserID);
+
+            reactBikeRentalsContext = reactBikeRentalsContext.OrderBy(b => b.Returned);
+            
             return View(await reactBikeRentalsContext.ToListAsync());
         }
 
@@ -87,19 +92,40 @@ namespace ReactBikes.Controllers
             {
                 return NotFound();
             }
-            if (rental.Comments == null)
-                rental.Comments = "n/a";
-
-            rental.Returned = true;
-            rental.Bike = _context.Bike.Find(rental.BikeID);
-            if(rental.Bike != null)
-                rental.Bike.Available = true;
             
             try
             {
-                _context.Update(rental.Bike);
+                if (rental.Rating < 1) rental.Rating = 1;
+                if (rental.Rating > 5) rental.Rating = 5;
+
+                if (rental.Comments == null)
+                    rental.Comments = "n/a";
+
+                rental.Returned = true;
+                rental.Bike = _context.Bike.Find(rental.BikeID);
+                if (rental.Bike != null)
+                {
+                    rental.Bike.Available = true;
+                    _context.Update(rental.Bike);
+                }
+
                 _context.Update(rental);
                 await _context.SaveChangesAsync();
+
+                // Update average rating
+                if (rental.Bike != null)
+                {
+                    int average_rating = 0;
+                    var all_rentals = _context.Rental.Where(m => m.BikeID == rental.Bike.BikeId);
+                    foreach (var r in all_rentals)
+                    {
+                        average_rating += r.Rating;
+                    }
+                    average_rating = average_rating / all_rentals.Count();
+                    rental.Bike.Rating = average_rating;
+                    _context.Update(rental.Bike);
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -121,6 +147,8 @@ namespace ReactBikes.Controllers
             Rental rental = new Rental();
             rental.DateFrom = DateTime.Now;
             rental.DateTo = DateTime.Now;
+            rental.Comments = "";
+            rental.Rating = 1;
             rental.BikeID = BikeID;
             rental.Bike = _context.Bike.Find(BikeID);
 
@@ -134,18 +162,18 @@ namespace ReactBikes.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("RentalId,UserID,BikeID,DateFrom,DateTo,DateReturned,Returned,Rating,Comments")] Rental rental)
         {
-            if (true) //(ModelState.IsValid)
+            rental.Comments = "";
+            rental.Rating = 1;
+            rental.UserID = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            rental.Bike = _context.Bike.Find(rental.BikeID);
+            if (rental.Bike != null)
             {
-                rental.Comments = "";
-                rental.UserID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                rental.Bike = _context.Bike.Find(rental.BikeID);
                 rental.Bike.Available = false;
                 _context.Update(rental.Bike);
-                _context.Add(rental);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
             }
-            return View(rental);
+            _context.Add(rental);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Rentals/Edit/5

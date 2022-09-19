@@ -50,15 +50,15 @@ namespace ReactBikes.Data
 
             var bikes = new Bike[]
             {
-                new Bike{ModelName="Ibis",Colour="Red",LocationPostcode="CH45 2NT",Rating=4,Available=true},
-                new Bike{ModelName="Stumpjumper",Colour="Green",LocationPostcode="CH65 9BQ",Rating=3,Available=true},
-                new Bike{ModelName="Yeti",Colour="Blue",LocationPostcode="WV11 1PF",Rating=2,Available=false},
-                new Bike{ModelName="Cannondale",Colour="Red",LocationPostcode="KY11 8HD",Rating=4,Available=true},
-                new Bike{ModelName="Kross SA",Colour="Green",LocationPostcode="ML2 8XT",Rating=3,Available=true},
-                new Bike{ModelName="Seven Cycles",Colour="Blue",LocationPostcode="MK45 3BA",Rating=2,Available=false},
-                new Bike{ModelName="Torpado",Colour="Red",LocationPostcode="CO7 6AA",Rating=4,Available=true},
-                new Bike{ModelName="Rocky Mountain Bicycles",Colour="Green",LocationPostcode="BB1 2FB",Rating=3,Available=true},
-                new Bike{ModelName="Polygon Bikes",Colour="Blue",LocationPostcode="ST16 1NR",Rating=2,Available=false}
+                new Bike{ModelName="Ibis",Colour="Red",LocationPostcode="CH45 2NT",Rating=0,Available=true},
+                new Bike{ModelName="Stumpjumper",Colour="Green",LocationPostcode="CH65 9BQ",Rating=0,Available=true},
+                new Bike{ModelName="Yeti",Colour="Blue",LocationPostcode="WV11 1PF",Rating=0,Available=false},
+                new Bike{ModelName="Cannondale",Colour="Red",LocationPostcode="KY11 8HD",Rating=0,Available=true},
+                new Bike{ModelName="Kross SA",Colour="Green",LocationPostcode="ML2 8XT",Rating=0,Available=true},
+                new Bike{ModelName="Seven Cycles",Colour="Blue",LocationPostcode="MK45 3BA",Rating=0,Available=false},
+                new Bike{ModelName="Torpado",Colour="Red",LocationPostcode="CO7 6AA",Rating=0,Available=true},
+                new Bike{ModelName="Rocky Mountain Bicycles",Colour="Green",LocationPostcode="BB1 2FB",Rating=0,Available=true},
+                new Bike{ModelName="Polygon Bikes",Colour="Blue",LocationPostcode="ST16 1NR",Rating=0,Available=false}
             };
             foreach (Bike bike in bikes)
             {

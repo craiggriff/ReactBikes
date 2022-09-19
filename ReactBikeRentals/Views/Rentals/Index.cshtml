@@ -41,8 +41,9 @@ else
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-            <tr class="tr_style" onclick="location.href = '@Url.Action(User.IsInRole("Manager")?"Edit":"Details", "Rentals", new { id = item.RentalId })'">
+    @foreach (var item in Model) 
+    {
+        <tr class="tr_style" onclick="location.href = '@Url.Action(User.IsInRole("Manager")?"Edit":"Details", "Rentals", new { id = item.RentalId })'">
             <td>
                 @Html.DisplayFor(modelItem => item.Bike.ModelName)
             </td>
@@ -65,30 +66,30 @@ else
                     }
                     else
                     {
-                        @("No")
+                        <strong><span style="color:red">No</span></strong>
                     }
                 </td>
             <td>
-                    @if (item.Returned == true)
+                @if (item.Returned == true)
+                {
+                    @for (int i = 0; i < 5; i++)
                     {
-                        @for (int i = 0; i < 5; i++)
+                        if (item.Rating <= i)
                         {
-                            if (item.Rating <= i)
-                            {
-                                <img src="/img/StarFade.jpg" width="20" />
-                            }
-                            else
-                            {
-                                <img src="/img/StarGlow.jpg" width="20" />
-                            }
+                            <img src="/img/StarFade.jpg" width="20" />
+                        }
+                        else
+                        {
+                            <img src="/img/StarGlow.jpg" width="20" />
                         }
                     }
-                    else
-                    {
-                        @("n/a")
-                    }
-                </td>
+                }
+                else
+                {
+                    @("n/a")
+                }
+            </td>
         </tr>
-}
+    }
     </tbody>
 </table>

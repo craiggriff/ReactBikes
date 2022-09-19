@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ReactBikes.Data;
 using ReactBikes.Models;
+using System.Data;
 
 namespace ReactBikes.Controllers
 {
@@ -15,6 +17,8 @@ namespace ReactBikes.Controllers
             _roleManager = roleManager;
             _userManager = userManager;
         }
+
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
@@ -35,6 +39,7 @@ namespace ReactBikes.Controllers
         {
             return new List<string>(await _userManager.GetRolesAsync(user));
         }
+        [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Manage(string userId)
         {
             ViewBag.userId = userId;
@@ -44,7 +49,10 @@ namespace ReactBikes.Controllers
                 ViewBag.ErrorMessage = $"User with Id = {userId} cannot be found";
                 return View("NotFound");
             }
-            ViewBag.UserName = user.UserName;
+            ViewBag.FirstName = user.FirstName;
+            ViewBag.LastName = user.LastName;
+            ViewBag.Email = user.Email;
+
             var model = new List<ManageUserViewModel>();
             foreach (var role in _roleManager.Roles)
             {
@@ -65,6 +73,8 @@ namespace ReactBikes.Controllers
             }
             return View(model);
         }
+
+        [Authorize(Roles = "Manager")]
         [HttpPost]
         public async Task<IActionResult> Manage(List<ManageUserViewModel> model, string userId)
         {
