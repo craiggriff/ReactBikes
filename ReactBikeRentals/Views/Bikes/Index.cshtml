@@ -6,10 +6,12 @@
 }
 
 <h1>Bikes</h1>
-
-<p>
-    <a asp-action="Create">Add Bike</a>
-</p>
+    @if (User.IsInRole("Manager"))
+    {
+        <p>
+            <a asp-action="Create">Add Bike</a>
+        </p>
+    }
 
 <form asp-controller="Bikes" asp-action="Index">
     <p>

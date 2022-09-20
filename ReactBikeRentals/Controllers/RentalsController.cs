@@ -27,14 +27,14 @@ namespace ReactBikes.Controllers
         public async Task<IActionResult> Index()
         {
             var _UserID = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // Only list My Rentals when in "User"
-            var reactBikeRentalsContext = User.IsInRole("Manager") ? 
-                _context.Rental.Include(r => r.Bike).Include(r => r.User) : 
-                _context.Rental.Include(r => r.Bike).Include(r => r.User).Where(r => r.UserID == _UserID);
-
-            reactBikeRentalsContext = reactBikeRentalsContext.OrderBy(b => b.Returned);
             
-            return View(await reactBikeRentalsContext.ToListAsync());
+            var Rentals = User.IsInRole("Manager") ? 
+                _context.Rental.Include(r => r.Bike).Include(r => r.User) :                                 // Manager
+                _context.Rental.Include(r => r.Bike).Include(r => r.User).Where(r => r.UserID == _UserID);  // User
+
+            Rentals = Rentals.OrderBy(b => b.Returned);
+            
+            return View(await Rentals.ToListAsync());
         }
 
         // GET: Rentals/Details/5

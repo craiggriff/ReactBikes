@@ -25,13 +25,10 @@ namespace ReactBikes.Controllers
             var userRolesViewModel = new List<UsersViewModel>();
             foreach (ReactBikesUser user in users)
             {
-                var thisViewModel = new UsersViewModel();
-                thisViewModel.UserId = user.Id;
-                thisViewModel.Email = user.Email;
-                thisViewModel.FirstName = user.FirstName;
-                thisViewModel.LastName = user.LastName;
-                thisViewModel.Roles = await GetUserRoles(user);
-                userRolesViewModel.Add(thisViewModel);
+                var usersViewModel = new UsersViewModel();
+                usersViewModel.User = user;
+                usersViewModel.Roles = await GetUserRoles(user);
+                userRolesViewModel.Add(usersViewModel);
             }
             return View(userRolesViewModel);
         }
@@ -42,41 +39,40 @@ namespace ReactBikes.Controllers
         [Authorize(Roles = "Manager")]
         public async Task<IActionResult> Manage(string userId)
         {
+            var model = new UsersViewModel();
             ViewBag.userId = userId;
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+            model.User = await _userManager.FindByIdAsync(userId);
+            if (model.User == null)
             {
                 ViewBag.ErrorMessage = $"User with Id = {userId} cannot be found";
                 return View("NotFound");
             }
-            ViewBag.FirstName = user.FirstName;
-            ViewBag.LastName = user.LastName;
-            ViewBag.Email = user.Email;
 
-            var model = new List<ManageUserViewModel>();
+            model.UserRolesViewModels = new List<UserRolesViewModel>();
             foreach (var role in _roleManager.Roles)
             {
-                var userRolesViewModel = new ManageUserViewModel
+                var userRoles = new UserRolesViewModel
                 {
                     RoleId = role.Id,
-                    RoleName = role.Name
+                    RoleName = role.Name,
+
                 };
-                if (await _userManager.IsInRoleAsync(user, role.Name))
+                if (await _userManager.IsInRoleAsync(model.User, role.Name))
                 {
-                    userRolesViewModel.Selected = true;
+                    userRoles.Selected = true;
                 }
                 else
                 {
-                    userRolesViewModel.Selected = false;
+                    userRoles.Selected = false;
                 }
-                model.Add(userRolesViewModel);
+                model.UserRolesViewModels.Add(userRoles);
             }
             return View(model);
         }
 
         [Authorize(Roles = "Manager")]
         [HttpPost]
-        public async Task<IActionResult> Manage(List<ManageUserViewModel> model, string userId)
+        public async Task<IActionResult> Manage(UsersViewModel model, string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -90,7 +86,7 @@ namespace ReactBikes.Controllers
                 ModelState.AddModelError("", "Cannot remove user existing roles");
                 return View(model);
             }
-            result = await _userManager.AddToRolesAsync(user, model.Where(x => x.Selected).Select(y => y.RoleName));
+            result = await _userManager.AddToRolesAsync(user, model.UserRolesViewModels.Where(x => x.Selected).Select(y => y.RoleName));
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Cannot add selected roles to user");
@@ -98,5 +94,46 @@ namespace ReactBikes.Controllers
             }
             return RedirectToAction("Index");
         }
+
+        // GET: Bikes/Delete/5
+        public async Task<IActionResult> Delete(string? id)
+        {
+            if (id == null || _userManager == null)
+            {
+                return NotFound();
+            }
+            UsersViewModel viewModel = new UsersViewModel();
+
+            viewModel.User = await _userManager.FindByIdAsync(id);
+            
+            if (viewModel.User == null)
+            {
+                return NotFound();
+            }
+
+            return View(viewModel);
+        }
+
+        
+        // POST: Bikes/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        
+        public async Task<IActionResult> DeleteConfirmed(string? id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return Problem("user is null.");
+            }
+            else
+            {
+                await _userManager.DeleteAsync(user);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+        
     }
 }
+

@@ -18,10 +18,10 @@
     <tbody>
         @foreach (var user in Model)
         {
-            <tr class="tr_style" onclick="location.href = '@Url.Action("Manage", "Users", new { userId = user.UserId })'">
-                <td>@user.FirstName</td>
-                <td>@user.LastName</td>
-                <td>@user.Email</td>
+            <tr class="tr_style" onclick="location.href = '@Url.Action("Manage", "Users", new { userId = user.User.Id })'">
+                <td>@user.User.FirstName</td>
+                <td>@user.User.LastName</td>
+                <td>@user.User.Email</td>
                 <td>@string.Join(" , ", user.Roles.ToList())</td>
             </tr>
         }

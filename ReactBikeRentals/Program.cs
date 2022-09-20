@@ -1,7 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using ReactBikes.Data;
+using ReactBikes.Models;
 using Microsoft.AspNetCore.Identity;
+using ReactBikes.Services;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ReactBikesContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ReactBikesContext") ?? throw new InvalidOperationException("Connection string 'ReactBikesContext' not found.")));
@@ -20,7 +25,9 @@ builder.Services.AddIdentity<ReactBikesUser, IdentityRole>(options =>
            .AddRoles<IdentityRole>()
            .AddEntityFrameworkStores<ReactBikesContext>();
 
-// Add services to the container.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSingleton<IBikeService, BikeService>();
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
@@ -37,7 +44,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthentication();;
+app.UseAuthentication(); ;
 
 app.UseAuthorization();
 
@@ -47,22 +54,46 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 
+// Add admin user
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    
-    try
-    {
-        var context = services.GetRequiredService<ReactBikesContext>();
-        var userManager = services.GetRequiredService<UserManager<ReactBikesUser>>();
-        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-        await ReactBikesDBInitialize.AddRolesAsync(userManager, roleManager);
-        await ReactBikesDBInitialize.AddManagerAsync(userManager, roleManager);
-    }
-    catch (Exception ex)
-    {
-
-    }
+    var context = services.GetRequiredService<ReactBikesContext>();
+    var userManager = services.GetRequiredService<UserManager<ReactBikesUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    await ReactBikesDBInitialize.AddRolesAsync(userManager, roleManager);
+    await ReactBikesDBInitialize.AddManagerAsync(userManager, roleManager);
 }
+
+app.UseSwagger();
+//Simple REST
+app.MapPost("/create", (Bike bike, IBikeService service, ReactBikesContext _context) => Create(_context, bike, service));
+app.MapGet("/get", (int id, IBikeService service, ReactBikesContext _context) => Get(_context, id, service));
+app.MapGet("/list", (IBikeService service, ReactBikesContext _context) => List(_context, service));
+app.MapPut("/update", (Bike bike, IBikeService service, ReactBikesContext _context) => Update(_context, bike, service));
+app.MapDelete("/delete", (int id, IBikeService service, ReactBikesContext _context) => Delete(_context, id, service));
+
+static IResult Create(ReactBikesContext _context, Bike bike, IBikeService service)
+{
+    return Results.Ok(service.Create(_context, bike));
+}
+static IResult Get(ReactBikesContext _context, int id, IBikeService service)
+{
+    return Results.Ok(service.Get(_context, id));
+}
+static IResult List(ReactBikesContext _context, IBikeService service)
+{
+    return Results.Ok(service.List(_context));
+}
+static IResult Update(ReactBikesContext _context, Bike bike, IBikeService service)
+{
+    return Results.Ok(service.Update(_context, bike));
+}
+static IResult Delete(ReactBikesContext _context, int id, IBikeService service)
+{
+    return Results.Ok(service.Delete(_context, id));
+}
+
+app.UseSwaggerUI();
 
 app.Run();
